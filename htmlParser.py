@@ -1,5 +1,6 @@
 from HTMLParser import HTMLParser
 
+# not a thread safe class
 class HTMLTokenizer(HTMLParser):
 	skippers = ['head', 'script', 'style']
 	def init(self):
