@@ -1,5 +1,7 @@
-import requests
+import requests, os, errno
 from htmlParser import HTMLTokenizer
+
+CORPUS_DIR='corpus'
 
 class HttpCrawler():
 	visited = None
@@ -16,6 +18,13 @@ class HttpCrawler():
 			self.siteBase = parts[0] + '//' + parts[2]
 		else:
 			self.siteBase = baseUrl
+
+		try:
+			os.makedirs(CORPUS_DIR)
+		except OSError as e:
+			if e.errno != errno.EEXIST:
+				raise
+
 
 	def urlInBase(self, url):
 		if len(url) < len(self.baseUrl):
@@ -39,13 +48,14 @@ class HttpCrawler():
 		tknzr = HTMLTokenizer()
 
 		words, links = tknzr.parse(requests.get(url).text)
-		for word in words:
-			self.corpus.append(word)
-			# if word in self.corpus:
-			# 	self.corpus[word] += 1
-			# else:
-			# 	self.corpus[word] = 1
-
+		with open(CORPUS_DIR + '/' + url.replace('/', '_'), 'w') as f:
+			for word in words:
+				self.corpus.append(word)
+				f.write(word.encode('utf-8') + ' ')
+				# if word in self.corpus:
+				# 	self.corpus[word] += 1
+				# else:
+				# 	self.corpus[word] = 1
 		for link in links:
 			if len(link) == 0:
 				# skip blank url
