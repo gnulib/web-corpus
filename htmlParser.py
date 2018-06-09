@@ -2,7 +2,9 @@ from HTMLParser import HTMLParser
 
 # not a thread safe class
 class HTMLTokenizer(HTMLParser):
-	skippers = ['head', 'script', 'style', 'nav', 'form', 'select']
+	# skippers = ['head', 'script', 'style', 'nav', 'form', 'select']
+	skippers = ['head', 'script', 'style', 'nav', 'header', 'footer', 'select']
+	# skippers = ['head', 'script', 'style', 'nav', 'select']
 	def init(self):
 		self.links = []
 		self.words = []
@@ -26,8 +28,10 @@ class HTMLTokenizer(HTMLParser):
 		
 		if tag in self.skippers:
 			self.skip += 1
+		# print '%s<%s>' % ('  '*self.skip, tag)
 
 	def handle_endtag(self, tag):
+		# print '%s</%s>' % ('  '*self.skip, tag)
 		if tag in self.skippers:
 			self.skip -= 1
 		if self.skip < 0:
