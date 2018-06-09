@@ -1,4 +1,4 @@
-import requests, os, errno
+import requests, os, errno, argparse
 from htmlParser import HTMLTokenizer
 
 CORPUS_DIR='corpus'
@@ -53,6 +53,8 @@ class HttpCrawler():
 
 		while len(self.linkList) > 0:
 			url = self.linkList[0]
+			if url[-1] == '/':
+				url = url[:-1]
 			self.linkList = self.linkList[1:]
 			print 'Crawling: %s ...' % url
 			words, links = tknzr.parse(requests.get(url).text)
@@ -81,3 +83,27 @@ class HttpCrawler():
 					self.visited[link] = 1
 					self.linkList.append(link)
 		return
+
+def main():
+	global CORPUS_DIR
+	parser = argparse.ArgumentParser()
+	parser.add_argument("base", help="base domain for crawling")
+	parser.add_argument("-d", "--dir", help="directory name to write text corpus")
+	parser.add_argument("-u", "--url", help="url to start crawling")
+	args = parser.parse_args()
+	if args.dir is not None:
+		CORPUS_DIR = args.dir
+	if args.base is None:
+		print "Error: need to specify base domain"
+		return
+	if args.base[-1] != '/':
+		args.base += '/'
+
+	if args.url is None:
+		args.url = args.base
+
+	crawler = HttpCrawler(args.base)
+	crawler.crawl(args.url)
+
+if __name__ == "__main__":
+    main()
