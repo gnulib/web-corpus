@@ -1,5 +1,6 @@
 import requests, os, errno, argparse
 from htmlParser import HTMLTokenizer
+from urlparse import urlparse
 
 CORPUS_DIR='corpus'
 
@@ -37,7 +38,17 @@ class HttpCrawler():
 
 		return True
 
+	# remove arguments, fragments etc
+	def normalizeUrl(self, url):
+		parts = urlparse(url)
+		url = ''
+		if len(parts.scheme) > 0:
+			url = parts.scheme + '://'
+		url += parts.netloc + parts.path
+		return url
+
 	def crawl(self, url):
+		url = self.normalizeUrl(url)
 		if not self.urlInBase(url):
 			return
 		if url in self.visited:
@@ -73,6 +84,7 @@ class HttpCrawler():
 				if len(link) < len('http://') or link[:len('http://')] not in ['https:/', 'http://']:
 					# append relative path to site's base url
 					link = self.siteBase + link
+				link = self.normalizeUrl(link)
 				if not self.urlInBase(link):
 					continue
 				if link in self.visited:
